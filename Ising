@@ -1,0 +1,93 @@
+#include <stdlib.h>
+#include <time.h>
+#include <fstream>
+#include<iostream>
+#include<math.h>
+using namespace std;
+
+int main()
+{
+    int N,c,aux, i, j,k,q, s[100][100];
+    double T,p,AE,W;
+    ofstream ising;
+
+    ising.open("ising.txt",ios::out);
+
+    cout<< "Introduce el tamaño de la red"<< endl;
+    cin>>N;
+    cout<< "Introduce el numero de iteraciones"<< endl;
+    cin>>q;
+
+    srand(time(NULL));
+
+    //Inicializamos temperatura y spin
+    T= 5.0*rand()/32767.00;
+    T=4;
+    cout<<"La temperatura es  "<< T<< endl;
+
+
+
+    for(i=1;i<=N;i++)
+    {
+        for(j=1;j<=N;j++)
+        {
+            s[i][j]=1;
+        }
+    }
+
+
+
+    for(k=1;k<=q;k++)
+    {
+        //elegimos un punto de la red al azar
+        i = 1+rand() % (N);
+        j = 1+rand() % (N);
+
+        //Imponemos condiciones de periodicidad
+
+        s[0][j]=s[N][j];
+        s[i][0]=s[i][N];
+        s[N+1][j]=s[1][j];
+        s[i][N+1]=s[i][1];
+
+        //evaluamos
+
+
+        AE=2*s[i][j]*(s[i+1][j]+s[i-1][j]+s[i][j+1]+s[i][j-1]);
+        p=pow(2.718281,-AE/T);
+
+        if(p>=1)
+        {
+            p=1;
+        }
+        W=rand()/32767.00;
+        if(W<p)
+        {
+            s[i][j]=-s[i][j];
+        }
+        if(k%1001==0)
+        {
+             for(i=1;i<=N;i++)
+        {
+            for(j=1;j<=N;j++)
+            {
+                if(j!=N)
+                {
+                    ising<<s[i][j]<<", ";
+                }
+                else
+                {
+                    ising<<s[i][j];
+                }
+
+            }
+            ising<<endl;
+        }
+        ising<<endl;
+        }
+
+    }
+    ising.close();
+
+return 0;
+}
