@@ -1,0 +1,150 @@
+#include <stdlib.h>
+#include <fstream>
+#include <time.h>
+#include<iostream>
+#include<math.h>
+#include<complex>
+using namespace std;
+
+int main()
+{
+
+    int N,j,q;
+    double t, norma;
+    complex <double> nciclos,Amenos,Amas, normaen5, Acero[10000],o[10000],beta[10000],b[10000],  gamma[10000], alpha[10000], x[10000], V[10000], Y, s,  jcomplejo, Ncomplejo, kcomplejo,k;
+    ofstream fnorma, fonda,chi,facero;
+
+    fnorma.open("fnorma.txt",ios::out);
+    fonda.open("fonda.txt",ios::out);
+    chi.open("chi.txt",ios::out);
+    facero.open("acero.txt",ios::out);
+
+    cout<<"Introduzca el numero de iteraciones"<< endl;
+    cin>>q;
+
+    //Definimos la unidad imaginaria
+    complex<double> i(0.0,1.0);
+
+    //Valores iniciales
+    Y=0.75;
+    N=1000;
+    Ncomplejo=N;
+    nciclos=Ncomplejo/4.0;
+    k=2*3.14159*nciclos/Ncomplejo;
+    kcomplejo=k;
+
+    s=1.0/(4.0*k*k);
+
+    Amenos=1.0;
+
+    Amas=1.0;
+
+
+    //Generamos el primer paso usando los valores iniciales
+
+    //Calculamos la funcion de onda en un punto y imponemos condiciones de contorno
+
+    o[0]=0.0;
+    o[N]=0.0;
+    for(j=1;j<=N-1;j++)
+    {
+        jcomplejo=j;
+        o[j]=pow(2.718281,kcomplejo*jcomplejo*i)*pow(2.718281,(-8.0)*(4.0*jcomplejo-Ncomplejo)*(4.0*jcomplejo-Ncomplejo)/Ncomplejo/Ncomplejo);
+    }
+
+    //Calculamos el potencial
+    for(j=0;j<=N;j++)
+    {
+         if(j>2.0*N/5.0 & j< 3.0*N/5.0)
+        {
+            V[j]=Y*kcomplejo*kcomplejo;
+        }
+        else
+        {
+            V[j]=0.0;
+        }
+    }
+    for(j=0;j<=N;j++)
+    {
+        Acero[j]=(-2.0)+2.0*i/s-V[j];
+
+    }
+
+
+        //condicion de contorno de alpha
+        alpha[N-1]=0.0;
+
+
+     //Calculamos alpha definiendo ante gamma
+
+        for(j=N-1;j>=0;j--)
+        {
+
+            gamma[j]=1.0/(Acero[j]+alpha[j]);
+            alpha[j-1]=-gamma[j];
+
+        }
+
+
+
+
+    //Empezamos el algoritmo de iteracion en el tiempo
+    for(t=0;t<=q;t=t+0.01)
+    {
+        //Metemos en un fichero los valores de la funcion de donda
+        for(j=0;j<=N;j++)
+        {
+            fonda<<j<<", "<<norm(o[j])<<endl;
+        }
+        fonda<<endl;
+
+
+        //Calculamos b
+        for(j=0;j<=N;j++)
+        {
+            b[j]=4.0*i*o[j]/s;
+        }
+
+        //Imponemos condiciones de contorno de beta
+        beta[N-1]=0.0;
+
+        //Calculamos beta usando b
+        for(j=N-1;j>=0;j--)
+        {
+            beta[j-1]=gamma[j]*(b[j]-beta[j]);
+        }
+
+
+        //Calculamos chi
+        for(j=0;j<=N-1;j++)
+        {
+            x[j+1]=alpha[j]*x[j]+beta[j];
+        }
+        x[0]=0.0;
+
+
+        //Por ultimo calculamos la funcion de onda en el siguiente instante
+        for(j=0;j<=N-1;j++)
+        {
+            o[j]=x[j]-o[j];
+
+        }
+
+        //Calculamos la norma
+        norma=0.0;
+        for(j=0;j<=N-1;j++)
+        {
+            norma=norma+norm(o[j])+(norm(o[j+1])-norm(o[j]))/2.0;
+        }
+
+
+    fnorma<< norma<<endl;
+
+
+}
+    fnorma.close();
+    fonda.close();
+    chi.close();
+    facero.close();
+  return 0;
+}
